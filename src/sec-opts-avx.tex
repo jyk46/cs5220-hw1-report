@@ -4,6 +4,7 @@
 
 % Reason for optimization
 \subsubsection{Reason for Optimization}
+
 Many modern processors utilize a separate SIMD pipeline capable of
 operating on wide (e.g., 256b, 512b) vector registers to achieve parallel
 computation of multiple data elements. Special vector instructions in the
@@ -54,12 +55,6 @@ pipeline with AVX instructions. In order to do this, the first step is to
 design a vectorization strategy for matrix
 multiplication. Figure~\ref{fig-opts-avx-vec} outlines the
 vectorization strategy used for this optimization.
-\smallskip
-
-The serial algorithm computes the output matrix as follows:
-\[
-C_{ij} = \sum_{k=0}^{N}A_{ik}*B_{kj}
-\]
 \smallskip
 
 If we consider the computations required to generate column {\tt{j}} of
@@ -158,10 +153,12 @@ whenever possible:
 
 % Results and analysis
 \subsubsection{Results}
+\input{fig-opts-avx-results}
 
 We evaluate both the regular and irregular memory access variants of the
 vectorizing optimization with FMAs and support for any matrix dimension
-using masked vector memory operations.
+using masked vector memory operations. The results are shown in
+Figure~\ref{fig-opts-avx-results}.
 \smallskip
 
 The regular variant showed the better speedup of ~3x over the naive
@@ -184,3 +181,5 @@ copying scalar registers to vector registers, as well as the mask
 calculation for masked vector memory operations. The overhead from
 conditional blocks for prioritizing different types of vector memory
 operations is non-trivial as well.
+
+\clearpage
