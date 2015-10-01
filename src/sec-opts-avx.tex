@@ -43,10 +43,9 @@ floating-point operation.
 \smallskip
 
 Although modern compilers have optimization passes to identify and
-generate vector instructions automatically, this capability is quite
-limited, and it is widely recognized that manually inserting vector
-\emph{intrinsics} is the preferred method of generating vector
-instructions.
+generate vector instructions automatically, this capability can be
+limited compared to manually manually inserting vector
+\emph{intrinsics}.
 \medskip
 
 % Details of optimization
@@ -160,7 +159,11 @@ whenever possible:
 
 We evaluate both the regular and irregular memory access variants of the
 vectorizing optimization with FMAs and support for any matrix dimension
-using masked vector memory operations. The results are shown in
+using masked vector memory operations. In order to quantify the benefit
+of manual-vectorization over auto-vectorization, we show the performance
+of the provided blocked implementation using the {\tt{-xAVX}} compiler
+flag. The results of using a combination of manual- and
+auto-vectorization were also collected. All results are shown in
 Figure~\ref{fig-opts-avx-results}.
 \smallskip
 
@@ -168,8 +171,13 @@ The regular variant showed the better speedup of ~3x over the naive
 blocked implementation. In contrast, the irregular variant had a slowdown
 of roughly ~2x over the same baseline, highlighting the importance of
 prioritizing desirable cache access patterns as well as efficient vector
-memory operations.
+memory operations. In addition, we can see that auto-vectorization is
+significantly worse than manual-vectorization, but combining both
+techniques outperforms either. This makes sense, since there are still
+opportunities for vectorization that are not exploited with
+manual-vectorization that is easier for the compiler to optimize.
 \smallskip
+
 
 Since we are using doubles (64b) for data elements and the SIMD pipeline
 is 256b wide, we know we can fit 4 elements per vector register. In the
@@ -185,4 +193,4 @@ calculation for masked vector memory operations. The overhead from
 conditional blocks for prioritizing different types of vector memory
 operations is non-trivial as well.
 
-\clearpage
+%\clearpage

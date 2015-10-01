@@ -8,70 +8,84 @@
 % Reason for optimization
 \subsection{Reason for Optimization}
 
-As many compilers are using loop optimization, we decided on changing the
-order of loops in order to improve the performance. For this
-optimization, we basically changed dgemm\_basic.c file, Our motivation was
-to reorder the loops; so that we could use the memory more
-efficiently. We wanted to access the already accessed parts of memory
-repeatedly as possible.
+The memory access pattern for DGEMM is largely determined by the order in
+which the matrices are traversed. Depending on the loop order and the
+arrangement of the matrices in memory (i.e., row-major vs. column-major),
+memory could be accessed with a unit-stride that maximizes temporal and
+spatial locality, or a stride equal to the matrix dimensions that is more
+likely to cause cache misses.
+\smallskip
+
+The goal of this optimization is to find the loop ordering that uses the
+data in a cache line as much as possible before bringing in another cache
+line. We explore a variety of loop orderings based on an intuitive
+analysis of how to achieve unit-stride memory accesses to identify the
+optimal loop ordering.
+\smallskip
 
 % Details of optimization
 \subsection{Details of Optimization}
 
-In the dgemm\_basic.c file we had the following code:
+\input{fig-opts-loop-access}
+
+The naive loop ordering of {\tt{ijk}} iterates across the output matrix
+{\tt{C}}, traversing the columns before traversing the rows. Computing
+each element in the output matrix requires traversing the columns of
+{\tt{A}} and traversing the rows of {\tt{B}}. This type of access pattern
+is generalized in Figure~\ref{fig-opts-loop-access}.
 \smallskip
 
-\begin{verbatim}
-    int i, j, k;
-    for (i = 0; i < M; ++i) {
-      for (j = 0; j < M; ++j) {
-        double cij = C[j*M+i];
-        for (k = 0; k < M; ++k)
-          cij += A[k*M+i] * B[j*M+k];
-        C[j*M+i] = cij;
-      }
-    }
-\end{verbatim}
+Because the matrices are arranged in a column-major pattern in memory,
+it is always preferable to traverse the rows (i.e., vertically) to yield
+unit-stride memory accesses. Any time we traverse the columns (i.e.,
+horizontally), we only use a single element in a cache line before
+accessing another cache line, which makes it more likely to have cache
+misses.
 \smallskip
 
-As mentioned, we want to change the order of the loops to get the best
-use of memory. This way we can take disadvantage of spatial locality to
-reduce the overhead of data transfer from main memory, or higher level
-caches to lower level caches.  In the algorithm above, we can see that we
-access the array as below:
+Given this, we can see that the naive loop ordering actually generates a
+very hostile memory access pattern since the innermost loop always
+traverses the columns of {\tt{A}} and the middle loop traverses the
+columns of {\tt{C}}.
 \smallskip
 
-\begin{verbatim}
-   A[k*M + i]
-   B[j*M + k]
-   C[j*M + i]
-\end{verbatim}
-
-Since we are going to access the elements of A and B over and over again,
-our intention was to make as less memory operations on these arrays as
-possible. In array A we access elements which has index of k*M+i. To make
-use of the already loaded data, we need to put the loop which we iterate
-over k to outermost. Following the same idea, we should put j in outer
-loop. This gave us the order of:
+Fortunately, we can leverage this insight to make an educated guess about
+which loop ordering would be preferable. Since the memory access pattern
+of the innermost loop is the most critical in exploiting temporal
+locality, it makes sense to iterate across {\tt{i}} for the innermost
+loop, as this will allow us to traverse the rows of both {\tt{A}} and
+{\tt{C}}, while using a single element from {\tt{B}} to calculate the
+partial products for an entire column of {\tt{C}}. Note that if the block
+size is large, traversing the rows will still require accessing multiple
+cache lines, but accessing consecutive cache lines will help avoid
+conflict misses more than if we traversed the columns. This means that
+either the {\tt{jki}} or the {\tt{kji}} ordering will yield the most
+desirable memory access patterns. The former allows us to reuse the same
+data for {\tt{B}} and {\tt{C}} while only shifting one column over in
+{\tt{A}}, whereas the latter only allows us to reuse the same data in
+{\tt{A}}. See Figure~\ref{fig-opts-loop-access} for visual comparisons.
 \smallskip
-
-\begin{verbatim}
-    for (j = 0; j < M; ++j)
-      for (k = 0; k < M; ++k)
-        for (i = 0; i < M; ++i)
-\end{verbatim}
-\smallskip
-
-\clearpage
 
 % Results and analysis
 \subsection{Results}
 
-\input{fig-opts-inner-results}
+\input{fig-opts-loop-results}
 
-As it is clear from the results in Figure~\ref{fig-opts-inner-results},
-we achieved significant performance improvement just by changing the
-order of loops; thus accessing memory efficiently. We also got an extra
-ordinary result between 700-1000 which will be inspected in further
-iterations.
+The results of all possible loop orderings are shown in
+Figure~\ref{fig-opts-loop-results}. We only show the effects of changing
+the loop ordering of the computation kernel operating on a given
+block. Although we did experiment with changing the loop ordering of the
+outer loop that traverses the blocks, the effects on performance were
+negligible. This was slightly contrary to expectations as the order in
+which the blocks are traversed should impact the reuse of data in
+lower-level caches (e.g., L2, L3), whereas the loop ordering of the
+computation kernel is more focused on L1 cache utilization.
+\smallskip
+
+As expected, the {\tt{jki}} ordering shows the greatest improvement in
+performance, followed by the {\tt{kji}} ordering. The other orderings
+either exacerbate the sub-optimal memory access patterns or have
+negligible improvements over the naive ordering.
 \medskip
+
+\clearpage
