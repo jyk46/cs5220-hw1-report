@@ -20,10 +20,29 @@ C_{ij} = \sum_{k=0}^{N}A_{ik}*B_{kj}
 \]
 \smallskip
 
-We use a standard blocking algorithm that computes smaller pieces of the
-output matrices at a time as a baseline for our optimizations. The
-high-level goals of the optimizations are to improve the code generated
-by the compiler, maximize hardware resource utilization, and produce more
-desirable memory access patterns.
+All optimizations are implemented on top of the provided blocking
+algorithm. We compare the performance of the optimizations against this
+baseline. The blocking algorithm splits the matrices into and operates on
+smaller blocks that are more likely to fit in the cache to better exploit
+temporal and spatial locality. The high-level goals of the optimizations
+explored in this assignment are to maximize hardware resource
+utilization, produce more desirable memory access patterns, ameliorate
+negative cache effects, and improve static analysis in the compiler.
+
+Specifically, the following optimizations are explored in this report:
+
+\begin{itemize}
+  \item Vectorizing with SIMD extensions to maximize hardware resource
+    utilization;
+  \item Changing the loop ordering to produce more desirable memory
+    access patterns;
+  \item Copying blocks into a scratchpad in contiguous memory to
+    avoid conflict misses in the cache;
+  \item Experimenting with C keywords and attributes to better express
+    the intent of the code to the compiler;
+  \item Utilizing profile-guided optimization to maximize the benefits of
+    static analysis in the compiler;
+\end{itemize}
 \smallskip
 
+\clearpage

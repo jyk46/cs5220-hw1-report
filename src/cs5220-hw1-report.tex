@@ -18,9 +18,9 @@
 
 % Title
 
-\title{CS5220 HW1 Report: Preliminary DGEMM Optimizations}
+\title{CS5220 HW1 Report: DGEMM Optimizations}
 
-\authors{Group 8: Ji Kim (jyk46) and Cem Iskir (ci48)}
+\authors{Group 8: Ji Kim (jyk46)}
 
 \makedescriptiontitle
 \vspace{0.1in}
@@ -28,12 +28,10 @@
 % Body
 
 \input{sec-intro}
-\input{sec-opts}
-
-\section{Note to Reader}
-Our third group member decided to audit the class and we were not
-notified until the day this report was due. Due to this, parts of this
-report are not up to the level of quality we were aiming for. We hope the
-reader will excuse this inconsistency. Thank you.
+\input{sec-opts-avx}
+\input{sec-opts-loop}
+\input{sec-opts-copy}
+\input{sec-opts-attr}
+\input{sec-opts-prof}
 
 \end{document}

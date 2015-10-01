@@ -1,9 +1,12 @@
 %=========================================================================
-% sec-opts-inner
+% sec-opts-loop
 %=========================================================================
 
+\section{Changing Loop Ordering}
+\label{sec-opts-loop}
+
 % Reason for optimization
-\subsubsection{Reason for Optimization}
+\subsection{Reason for Optimization}
 
 As many compilers are using loop optimization, we decided on changing the
 order of loops in order to improve the performance. For this
@@ -13,7 +16,7 @@ efficiently. We wanted to access the already accessed parts of memory
 repeatedly as possible.
 
 % Details of optimization
-\subsubsection{Details of Optimization}
+\subsection{Details of Optimization}
 
 In the dgemm\_basic.c file we had the following code:
 \smallskip
@@ -62,7 +65,7 @@ loop. This gave us the order of:
 \clearpage
 
 % Results and analysis
-\subsubsection{Results}
+\subsection{Results}
 
 \input{fig-opts-inner-results}
 

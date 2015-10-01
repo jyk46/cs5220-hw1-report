@@ -2,8 +2,11 @@
 % sec-opts-avx
 %=========================================================================
 
+\section{Vectorizing with SIMD Extensions}
+\label{sec-opts-avx}
+
 % Reason for optimization
-\subsubsection{Reason for Optimization}
+\subsection{Reason for Optimization}
 
 Many modern processors utilize a separate SIMD pipeline capable of
 operating on wide (e.g., 256b, 512b) vector registers to achieve parallel
@@ -47,7 +50,7 @@ instructions.
 \medskip
 
 % Details of optimization
-\subsubsection{Details of Optimization}
+\subsection{Details of Optimization}
 \input{fig-opts-avx-vec}
 
 As such, the goal of this optimization is to effectively utilize the SIMD
@@ -152,7 +155,7 @@ whenever possible:
 \medskip
 
 % Results and analysis
-\subsubsection{Results}
+\subsection{Results}
 \input{fig-opts-avx-results}
 
 We evaluate both the regular and irregular memory access variants of the
