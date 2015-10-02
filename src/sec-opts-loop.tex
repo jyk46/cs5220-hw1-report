@@ -86,6 +86,17 @@ As expected, the {\tt{jki}} ordering shows the greatest improvement in
 performance, followed by the {\tt{kji}} ordering. The other orderings
 either exacerbate the sub-optimal memory access patterns or have
 negligible improvements over the naive ordering.
+\smallskip
+
+One caveat with not iterating over {\tt{k}} in the innermost loop is that
+we cannot accumulate the partial products for a given element in the
+output matrix in the local register storage. For example, in the
+{\tt{jki}} ordering, we must store the partial product for all elements
+in a given column in the output matrix to memory, then load each one back
+again for the accumulation when {\tt{k}} increments. However, since using
+the optimal loop ordering encourages reuse of data in the L1 cache, the
+overhead of storing/loading of partial products is not as significant as
+if we were using the naive loop ordering.
 \medskip
 
 \clearpage

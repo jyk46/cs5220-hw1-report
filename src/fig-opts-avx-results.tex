@@ -9,9 +9,12 @@
 
   \caption{\textbf{Performance Comparison of AVX Optimizations --}
     Both AVX optimizations with the irregular and regular memory access
-    patterns are shown. We intentionally omit the results for BLAS nad
-    MKL implementations in order to focus on the behavior at the
-    performance range of the optimization.}
+    patterns are shown. In addition, the naive blocking implementation
+    with auto-vectorization is included for comparison. Combining both
+    manual- and auto-vectorization achieves the best results. We
+    intentionally omit the results for BLAS nad MKL implementations in
+    order to focus on the behavior at the performance range of the
+    optimization.}
 
   \label{fig-opts-avx-results}
 
