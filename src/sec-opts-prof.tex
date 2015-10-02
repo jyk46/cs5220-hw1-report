@@ -1,5 +1,5 @@
 %=========================================================================
-% sec-opts-comp
+% sec-opts-prof
 %=========================================================================
 
 \section{Utilizing Profile-Guided Optimization}
@@ -8,56 +8,42 @@
 % Reason for optimization
 \subsection{Reason for Optimization}
 
-Although modern compilers are quite sophisticated and usually generate
-high-quality code, often it is not as simple as using the {\tt{-O3}}
-option in order to generate the best code that the compiler is capable of
-generating. In fact, sometimes being too aggressive can be have negative
-impacts and it is known that using {\tt{-O2}} can be preferable. This
-highlights the fact that compilers are not all-knowing and can benefit
-significantly from a little nudging from the user by explicitly declaring
-the intent of the code and identifying opportunities for certain
-optimizations.
+Modern compilers are quite sophisticated and provide many features that
+can improve the quality of the generated code. However, a general
+challenge with compilers is that they can only act on static
+analysis. This means that it cannot make any assumptions about
+data-dependent control flow. If the compiler could have access to dynamic
+information about an application, though, it could predicate branches
+more aggressively based on the general patterns it detects during
+runtime.
 \smallskip
 
 % Details of optimization
 \subsection{Details of Optimization}
 
-For this preliminary report, we experimented with different combinations
-of options to the Intel C compiler (icc). We use the naive blocked
-implementation as the baseline for all of the experiments.
+Fortunately, we can actually provide such dynamic information to the
+compiler by using profile-guided optimizations (PGO). By enabling PGO in
+the compiler, every run of an application dumps a .dyn file that
+summarizes the trends of the application during runtime. This information
+in turn can be used in a subsequent compilation to aggressively optimize
+the code.
 \smallskip
 
-\begin{itemize}
-  \item \textbf{-O2 --} Uses less aggressive optimizations. Namely it disables
-function inlining and auto-vectorization (non-AVX).
-
-  \item \textbf{-fast --} Enables more aggressive floating-point operations on
-top of {\tt{-O3}}.
-
-  \item \textbf{-xAVX --} An option that attempts to vectorize the code by
-converting scalar instructions into vector instructions that utilize the
-SIMD pipeline in the processor.
-\end{itemize}
+From our experiments, it seems that the more dynamic information is
+collected in the form of multiple .dyn files, the more the performance
+improves. This makes sense since with more samples, the compiler is
+getting a more accurate portrayal of the average execution of the
+application.
 \smallskip
 
 % Results and analysis
 \subsection{Results}
 
-\input{fig-opts-comp-results}
+\input{fig-opts-prof-results}
 
-The results for using the various compiler options are shown in
-Figure~\ref{fig-opts-comp-results}. Unfortunately, none of these extra
-compiler options improved performance over the naive blocked
-implementation. In fact, the {\tt{-xAVX}} option slightly decreased
-performance. An object dump of the binary showed that the compiler was
-indeed inserting vector instructions but it seems a naive
-auto-vectorization can actually degrade performance. The other options
-actually had roughly the same performance as the naive blocked
-implementation. One interesting point to note is that the basic
-implementation outperforms the blocked implementation for smaller matrix
-sizes. This makes sense since the overhead of communication required
-through memory between blocks is more noticeable for smaller matrices
-when there is less computation per block (i.e., lower
-volume-to-surface-area ratio).
-
-\clearpage
+Figure~\ref{fig-opts-prof-results} shows the results with PGO enabled
+using dynamic information collected from ten unique runs. Please see the
+prof/ subdirectory for all .dyn files. The culmination
+of all the optimizations explored in this assignment shows that we can
+reach over 10GFLOPS/s of performance, which is roughly a 5x speedup over
+the naive blocked baseline implementation.

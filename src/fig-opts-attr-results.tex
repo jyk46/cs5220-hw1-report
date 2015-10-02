@@ -1,0 +1,21 @@
+%=========================================================================
+% fig-opts-attr-results.tex
+%=========================================================================
+
+\begin{figure}[b]
+
+  \centering
+  \includegraphics[width=0.7\tw]{fig-opts-attr-results.pdf}
+
+  \caption{\textbf{Performance Comparison of Attribute Optimizations --}
+    Results for the blocked implementation with the previous three
+    optimizations (i.e., AVX, loop ordering, copy optimization) are shown
+    as {\tt{mine}}. Results form adding the compiler hints on top of this
+    aggregative implementation are shown as {\tt{mine-attributes}}.  We
+    intentionally omit the results for BLAS nad MKL implementations in
+    order to focus on the behavior at the performance range of the
+    optimization.}
+
+  \label{fig-opts-attr-results}
+
+\end{figure}
